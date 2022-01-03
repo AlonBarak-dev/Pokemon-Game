@@ -1,3 +1,6 @@
+import math
+
+from client_python.pokemon import Pokemon
 from graph.GraphInterface import GraphInterface
 from graph.Edge import Edge
 from graph.Node import Node
@@ -116,6 +119,32 @@ class DiGraph(GraphInterface):
         self.nodes[node_id] = node
         self.mode_count += 1  # update mode counter
         return True
+
+    def add_pokemon(self, pokemon: Pokemon):
+        """
+        this method adds a pokemon
+        """
+        self.nodes[pokemon.key] = pokemon
+        self.mode_count += 1
+
+    def find_edge(self, pok: Pokemon) -> tuple:
+        res = ()
+        for edge in self.edges:
+            src_x = self.nodes[edge.src].pos.x
+            src_y = self.nodes[edge.src].pos.y
+            dest_x = self.nodes[edge.dest].pos.x
+            dest_y = self.nodes[edge.dest].pos.y
+            pok_x = pok.pos.x
+            pok_y = pok.pos.y
+            dist_edge = math.sqrt(math.pow(src_x - dest_x, 2) + math.pow(src_y - dest_y, 2))
+            dist_src_pok = math.sqrt(math.pow(src_x - pok_x, 2) + math.pow(src_y - pok_y, 2))
+            dist_pok_dest = math.sqrt(math.pow(dest_x - pok_x, 2) + math.pow(dest_y - pok_y, 2))
+            if dist_edge + 0.0001 >= dist_pok_dest + dist_src_pok:
+                if (edge.src > edge.dest and pok.type > 0) or (edge.src < edge.dest and pok.type < 0):
+                    weight1 = edge.weight * (dist_src_pok / dist_edge)
+                    weight2 = edge.weight - weight1
+                    return edge, weight1, weight2
+        return res
 
     def remove_edge(self, node_id1: int, node_id2: int) -> bool:
         """

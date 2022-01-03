@@ -1,15 +1,16 @@
 from graph.GeoLocation import GeoLocation
+from graph.Node import Node
 
 
-class Pokemon(object):
+class Pokemon(Node):
 
-    def __init__(self, value: int, type: int, pos: GeoLocation):
+    def __init__(self, value: int, type: int, pos: GeoLocation, key:int):
+        super(Pokemon, self).__init__(pos=GeoLocation(pos.x, pos.y, pos.z), key=key)
         self.value = value
         self.type = type
-        self.pos = GeoLocation(pos.x, pos.y, pos.z)
 
     @classmethod
-    def from_dict(cls, data) -> 'Pokemon':
+    def from_dict_pok(cls, data, key:int) -> 'Pokemon':
         """
         this method creates a Pokemon from a dictionary.
         :param data: Data dict
@@ -23,7 +24,7 @@ class Pokemon(object):
         if pos is not None:
             pos = GeoLocation(*pos.split(','))  # create new GeoLocation
 
-        poki = Pokemon(value, type, pos)
+        poki = Pokemon(value, type, pos, key)
         return poki
 
     # setting some getters for the class

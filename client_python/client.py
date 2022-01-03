@@ -114,7 +114,7 @@ class Client:
         """
         returns the current pokemons state as json str.\n
         for pokemon lying on edge (graph,dest), then:\n
-        graph < dest => type > 0\n
+        src < dest => type > 0\n
         dest < graph => type < 0\n
         example:\n
         {

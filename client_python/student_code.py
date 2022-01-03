@@ -12,6 +12,7 @@ from pygame import *
 from client_python.Agent import Agent
 from client_python.Info import Info
 from client_python.pokemon import Pokemon
+from graph.DiGraph import DiGraph
 from graph.GraphAlgo import GraphAlgo
 
 # init pygame
@@ -30,11 +31,6 @@ pygame.font.init()
 client = Client()
 client.start_connection(HOST, PORT)
 
-# pokemons = client.get_pokemons()
-# pokemons_obj = json.loads(pokemons, object_hook=lambda d: SimpleNamespace(**d))
-
-# print(pokemons)
-
 graph_json = client.get_graph()
 
 FONT = pygame.font.SysFont('Arial', 20, bold=True)
@@ -42,10 +38,6 @@ FONT = pygame.font.SysFont('Arial', 20, bold=True)
 
 graph = GraphAlgo()
 graph.load_from_json(json.loads(graph_json))
-
-# for n in graph.get_graph().nodes:
-#     x, y, _ = n.pos.split(',')
-#     n.pos = SimpleNamespace(x=float(x), y=float(y))
 
 # get data proportions
 min_x = min(list(graph.get_graph().nodes.values()), key=lambda n: n.pos.x).pos.x
@@ -73,7 +65,10 @@ def my_scale(data, x=False, y=False):
 
 radius = 15
 
-client.add_agent("{\"id\":0}")
+game_info = Info.from_dict(json.loads(client.get_info()))
+for i in range(game_info.agents):
+    client.add_agent("{\"id\":0}")
+
 # client.add_agent("{\"id\":1}")
 # client.add_agent("{\"id\":2}")
 # client.add_agent("{\"id\":3}")
@@ -86,14 +81,34 @@ The code below should be improved significantly:
 The GUI and the "algo" are mixed - refactoring using MVC design pattern is required.
 """
 
+
+def find_nearest_avaliable_agent() -> int:
+    return 0
+
+
 while client.is_running() == 'true':
+
+    graph_copy = GraphAlgo()  # copy graph
+    graph_copy.load_from_json(json.loads(graph_json))
 
     # initialize pokemon list
     pokemons = json.loads(client.get_pokemons())
     pokemon_list = []
     pokemons = pokemons.get("Pokemons")
     for pokemon in pokemons:
-        poki = Pokemon.from_dict(pokemon.get("Pokemon"))
+        key = max(graph.get_graph().nodes.keys()) + 1
+        poki = Pokemon.from_dict_pok(pokemon.get("Pokemon"), key)
+        graph_copy.graph.add_pokemon(poki)
+
+        edge, weight1, weight2 = graph.graph.find_edge(poki)
+        src = edge.src
+        dest = edge.dest
+        weight = edge.weight
+
+        graph_copy.graph.add_edge(src, poki.key, weight1)
+        graph_copy.graph.add_edge(poki.key, dest, weight2)
+        graph_copy.graph.remove_edge(edge.src, edge.dest)
+
         pokemon_list.append(poki)
 
     # creating agent object from the json file
@@ -102,6 +117,7 @@ while client.is_running() == 'true':
     agent_json = agent_json.get("Agents")
     for agent in agent_json:
         agt = Agent.from_dict(agent.get("Agent"))
+        # client.add_agent(client.add_agent("{\"id\":0}"))
         agents.append(agt)
 
     # check events
@@ -117,7 +133,6 @@ while client.is_running() == 'true':
     for n in graph.get_graph().nodes.values():
         x = my_scale(n.pos.x, x=True)
         y = my_scale(n.pos.y, y=True)
-
         # its just to get a nice antialiased circle
         gfxdraw.filled_circle(screen, int(x), int(y),
                               radius, Color(64, 80, 174))
@@ -149,10 +164,11 @@ while client.is_running() == 'true':
     for agent in agents:
         x = my_scale(float(agent.pos.x), x=True)
         y = my_scale(float(agent.pos.y), y=True)
-        pygame.draw.circle(screen, Color(122, 61, 23),(x,y), 10)
+        pygame.draw.circle(screen, Color(122, 61, 23), (x, y), 10)
 
     # draw Pokemons (note: should differ (GUI wise) between the up and the down pokemons (currently they are marked
     # in the same way).
+
     for p in pokemon_list:
         x = my_scale(float(p.pos.x), x=True)
         y = my_scale(float(p.pos.y), y=True)
@@ -164,15 +180,35 @@ while client.is_running() == 'true':
     # refresh rate
     clock.tick(10)
 
-    # choose next edge
-    for agent in agents:
-        if agent.dest == -1:
-            next_node = (agent.src - 1) % len(graph.get_graph().nodes)
-            client.choose_next_edge(
-                '{"agent_id":' + str(agent.id) + ', "next_node_id":' + str(next_node) + '}')
-            ttl = client.time_to_end()
-            info = Info.from_dict(json.loads(client.get_info()))
-            print(ttl, info)
+# choose next edge
+#  for agent in agents:
+#      print(f"{agent.src} -> {agent.dest}")
+#      if agent.dest == -1:
+#          # can be used when receiving a path from TSP method
+#          next_node = (agent.src - 1) % len(graph.get_graph().nodes)
+#          client.choose_next_edge('{"agent_id":' + str(agent.id) + ', "next_node_id":' + str(next_node) + '}')
+#
+#          ttl = client.time_to_end()
+#          info = Info.from_dict(json.loads(client.get_info()))
+#          print(ttl, info)
 
-    client.move()
+# graph_copy.plot_graph()
+# client.move()       # we want to do move() only when near pokemon!!!!!!!
+
+    for pokemon in pokemon_list:
+        agent_id: int = find_nearest_avaliable_agent()
+        graph_copy.shortest_path(graph_copy.graph.nodes[pokemon.key], agent_id)
+
+
+
+
 # game over:
+
+
+
+
+
+
+
+
+
