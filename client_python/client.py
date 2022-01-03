@@ -113,9 +113,9 @@ class Client:
     def get_pokemons(self):
         """
         returns the current pokemons state as json str.\n
-        for pokemon lying on edge (src,dest), then:\n
-        src < dest => type > 0\n
-        dest < src => type < 0\n
+        for pokemon lying on edge (graph,dest), then:\n
+        graph < dest => type > 0\n
+        dest < graph => type < 0\n
         example:\n
         {
             "Pokemons":[
@@ -177,7 +177,7 @@ class Client:
         '{"agent_id":0, "next_node_id":1}'.
         Note that if\n
         1. the agent is still moving on some edge, (a.k. agent.dest != -1)
-        or 2. the "next_node_id" isn't an adjacent vertex of agent.src,
+        or 2. the "next_node_id" isn't an adjacent vertex of agent.graph,
         then move() won't be affected by this invalid "next_node_id" choice.
         """
         res = self.__send_message("chooseNextEdge")
