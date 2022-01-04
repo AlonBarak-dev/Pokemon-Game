@@ -8,6 +8,7 @@ class Pokemon(Node):
         super(Pokemon, self).__init__(pos=GeoLocation(pos.x, pos.y, pos.z), key=key)
         self.value = value
         self.type = type
+        self.agent_id = None
 
     @classmethod
     def from_dict_pok(cls, data, key:int) -> 'Pokemon':

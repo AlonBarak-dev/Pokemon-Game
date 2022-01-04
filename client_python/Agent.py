@@ -13,6 +13,7 @@ class Agent(object):
         self.dest = dest
         self.speed = speed
         self.pos = GeoLocation(pos.x, pos.y, pos.z)
+        self.path = []
 
     @classmethod
     def from_dict(self, data: dict) -> 'Agent':

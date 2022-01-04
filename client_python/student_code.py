@@ -3,6 +3,7 @@
 OOP - Ex4
 Very simple GUI example for python client to communicates with the server and "play the game!"
 """
+import math
 from types import SimpleNamespace
 from client import Client
 import json
@@ -82,8 +83,51 @@ The GUI and the "algo" are mixed - refactoring using MVC design pattern is requi
 """
 
 
-def find_nearest_avaliable_agent() -> int:
-    return 0
+def sorting_func(pokemon):
+    return pokemon.value
+
+
+def find_nearest_avaliable_agent(agent_list: list, curr_pokemon: Pokemon, graph: GraphAlgo) -> int:
+    free_agents = []
+    min_weight = math.inf
+    path = []
+    agent_res = None
+    # find free agents
+    for agent in agent_list:
+        if agent.path is None:
+            free_agents.append(agent)  # add to the list of free agents
+
+    if free_agents:  # in case we found free agents
+
+        for agent in free_agents:  # loop over the free agents
+            dist, sp_path = graph.shortest_path(agent.src,
+                                                curr_pokemon.key)  # find the shortest path from agent src to pokemon
+            # in case we found an agent with shorter path, switch
+            if dist < min_weight:
+                min_weight = dist
+                path = sp_path
+                agent_res = agent
+
+        agent_res.path = path  # update the agent path
+        return agent_res.id  # return the agent id
+
+    else:  # in case there are no free agents, loop over the agents
+
+        for agent in agent_list:
+            # in case one of the agents already going to the pokemon node, allocate the same agent
+            if pokemon.key in agent.path:
+                return agent.id
+
+            # find the shortest path from the agent last destination to the pokemon
+            dist, sp_path = graph.shortest_path(agent.path[-1], curr_pokemon.key)
+            # in case we found an agent with shorter path, switch
+            if dist < min_weight:
+                min_weight = dist
+                path = sp_path
+                agent_res = agent
+
+        agent_res.path.extand(path)  # update the agent path
+        return agent_res.id
 
 
 while client.is_running() == 'true':
@@ -180,35 +224,24 @@ while client.is_running() == 'true':
     # refresh rate
     clock.tick(10)
 
-# choose next edge
-#  for agent in agents:
-#      print(f"{agent.src} -> {agent.dest}")
-#      if agent.dest == -1:
-#          # can be used when receiving a path from TSP method
-#          next_node = (agent.src - 1) % len(graph.get_graph().nodes)
-#          client.choose_next_edge('{"agent_id":' + str(agent.id) + ', "next_node_id":' + str(next_node) + '}')
-#
-#          ttl = client.time_to_end()
-#          info = Info.from_dict(json.loads(client.get_info()))
-#          print(ttl, info)
+    # choose next edge
+    #  for agent in agents:
+    #      print(f"{agent.src} -> {agent.dest}")
+    #      if agent.dest == -1:
+    #          # can be used when receiving a path from TSP method
+    #          next_node = (agent.src - 1) % len(graph.get_graph().nodes)
+    #          client.choose_next_edge('{"agent_id":' + str(agent.id) + ', "next_node_id":' + str(next_node) + '}')
+    #
+    #          ttl = client.time_to_end()
+    #          info = Info.from_dict(json.loads(client.get_info()))
+    #          print(ttl, info)
 
-# graph_copy.plot_graph()
-# client.move()       # we want to do move() only when near pokemon!!!!!!!
-
+    # graph_copy.plot_graph()
+    # client.move()       # we want to do move() only when near pokemon!!!!!!!
+    pokemon_list = sorted(pokemon_list, key=sorting_func, reverse=True)       # sort the pockemons base on their values
+    # assign agent for each pokemon
     for pokemon in pokemon_list:
-        agent_id: int = find_nearest_avaliable_agent()
-        graph_copy.shortest_path(graph_copy.graph.nodes[pokemon.key], agent_id)
-
-
-
+        agent_id: int = find_nearest_avaliable_agent(agents, pokemon, graph_copy)
+        pokemon.agent_id = agent_id
 
 # game over:
-
-
-
-
-
-
-
-
-
