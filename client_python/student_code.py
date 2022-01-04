@@ -1,8 +1,3 @@
-"""
-@author AchiyaZigi
-OOP - Ex4
-Very simple GUI example for python client to communicates with the server and "play the game!"
-"""
 import math as mh
 import sys
 from threading import Thread
@@ -17,50 +12,6 @@ from client_python.Info import Info
 from client_python.pokemon import Pokemon
 from graph.GraphAlgo import GraphAlgo
 from Button import Button
-
-
-# # init pygame
-# WIDTH, HEIGHT = 1080, 720
-#
-# # default port
-# PORT = 6666
-# # server host (default localhost 127.0.0.1)
-# HOST = '127.0.0.1'
-# pygame.init()
-#
-# screen = display.set_mode((WIDTH, HEIGHT), depth=32, flags=RESIZABLE)
-# clock = pygame.time.Clock()
-# pygame.font.init()
-# client = Client()
-# client.start_connection(HOST, PORT)
-# graph_json = client.get_graph()
-# FONT = pygame.font.SysFont('Arial', 20, bold=True)
-#
-# # load the json string into SimpleNamespace Object
-# graph = GraphAlgo()
-# graph.load_from_json(json.loads(graph_json))
-#
-# # get data proportions
-# min_x = min(list(graph.get_graph().nodes.values()), key=lambda n: n.pos.x).pos.x
-# min_y = min(list(graph.get_graph().nodes.values()), key=lambda n: n.pos.y).pos.y
-# max_x = max(list(graph.get_graph().nodes.values()), key=lambda n: n.pos.x).pos.x
-# max_y = max(list(graph.get_graph().nodes.values()), key=lambda n: n.pos.y).pos.y
-
-
-# def scale(data, min_screen, max_screen, min_data, max_data):
-#     """
-#     get the scaled data with proportions min_data, max_data
-#     relative to min and max screen dimentions
-#     """
-#     return ((data - min_data) / (max_data - min_data)) * (max_screen - min_screen) + min_screen
-#
-#
-# # decorate scale with the correct values
-# def my_scale(data, x=False, y=False):
-#     if x:
-#         return scale(data, 50, screen.get_width() - 50, min_x, max_x)
-#     if y:
-#         return scale(data, 50, screen.get_height() - 50, min_y, max_y)
 
 
 def run_agent(agent: Agent, g_algo: GraphAlgo):
@@ -131,6 +82,12 @@ def find_nearest_avaliable_agent(agent_list: list, curr_pokemon: Pokemon, graph:
 
 
 if __name__ == '__main__':
+    """
+    main method.
+    this method run the game while connecting to the server.
+    PORT: 6666
+    HOST: 127.0.0.1 -> local host
+    """
 
     # default port
     PORT = 6666
@@ -175,15 +132,16 @@ if __name__ == '__main__':
                 poki = Pokemon.from_dict_pok(pokemon.get("Pokemon"), key)
                 graph_copy.graph.add_pokemon(poki)
 
-                edge, weight1, weight2 = graph.graph.find_edge(poki)
+                edge, weight1, weight2 = graph.graph.find_edge(poki)        # find the edge the pokemon is on
                 src = edge.src
                 dest = edge.dest
                 weight = edge.weight
                 poki.edge = edge
+                # modify graph_copy base on the pokemon values
                 graph_copy.graph.add_edge(src, poki.key, weight1)
                 graph_copy.graph.add_edge(poki.key, dest, weight2)
                 graph_copy.graph.remove_edge(edge.src, edge.dest)
-
+                # add pokemon to pokemon list for more usages
                 pokemon_list.append(poki)
                 print(poki.type)
 

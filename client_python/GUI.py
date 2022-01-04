@@ -54,8 +54,8 @@ class Gui:
         self.screen.fill(Color(0, 0, 0))
 
         # draw elements in the screen base on given state and data
-        self.draw_nodes()
         self.draw_edges()
+        self.draw_nodes()
         self.draw_agents()
         self.draw_pokemons()
         self.create_buttons(ttl, game_info)
