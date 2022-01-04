@@ -71,8 +71,6 @@ game_info = Info.from_dict(json.loads(client.get_info()))
 for i in range(game_info.agents):
     client.add_agent("{\"id\":" + str(i) + "}")
 
-
-
 # this commnad starts the server - the game is running now
 client.start()
 
@@ -83,16 +81,18 @@ The GUI and the "algo" are mixed - refactoring using MVC design pattern is requi
 
 
 def run_agent(agent: Agent, g_algo: GraphAlgo):
-    while agent.path:
+    while len(agent.path) != 0:
         p = agent.path[0]
-        if stop:
-            break
+        if stop:  # global bool variable indicate when one pokemon found
+            return
         client.choose_next_edge(
             '{"agent_id":' + str(agent.id) + ', "next_node_id":' + str(agent.path[1 % len(agent.path)]) + '}')
         agent.pos = g_algo.get_graph().nodes[agent.path[1 % len(agent.path)]].pos
         agent.path.remove(agent.path[0])
+        print(agent.dest)
         if isinstance(g_algo.get_graph().get_all_v()[p], Pokemon):
-            break
+            client.move()
+            return
 
 
 def sorting_func(pokemon):
@@ -105,6 +105,7 @@ def find_nearest_avaliable_agent(agent_list: list, curr_pokemon: Pokemon, graph:
     path = []
     agent_res = None
     pokemon = curr_pokemon
+
     # find free agents
     for agent in agent_list:
         if len(agent.path) == 0:
@@ -112,7 +113,8 @@ def find_nearest_avaliable_agent(agent_list: list, curr_pokemon: Pokemon, graph:
 
     if len(free_agents) != 0:  # in case we found free agents
         for agent in free_agents:  # loop over the free agents
-            dist, sp_path = graph.shortest_path(agent.src, pokemon.edge.src)  # find the shortest path from agent src to pokemon
+            dist, sp_path = graph.shortest_path(agent.src,
+                                                pokemon.edge.src)  # find the shortest path from agent src to pokemon
             dist_1, sp_path_1 = graph.shortest_path(pokemon.edge.src, pokemon.edge.dest)
             dist += dist_1
             sp_path += sp_path_1
@@ -158,7 +160,6 @@ while client.is_running() == 'true':
     pokemons = pokemons.get("Pokemons")
 
     for pokemon in pokemons:
-        
         key = max(graph_copy.get_graph().nodes.keys()) + 1
         poki = Pokemon.from_dict_pok(pokemon.get("Pokemon"), key)
         graph_copy.graph.add_pokemon(poki)
@@ -182,9 +183,9 @@ while client.is_running() == 'true':
     agent_json = agent_json.get("Agents")
     for agent in agent_json:
         agt = Agent.from_dict(agent.get("Agent"))
-        # client.add_agent(client.add_agent("{\"id\":0}"))
         agents.append(agt)
 
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ GUI
     # check events
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -244,32 +245,37 @@ while client.is_running() == 'true':
 
     # refresh rate
     clock.tick(10)
-    pokemon_list = sorted(pokemon_list, key=sorting_func, reverse=True)  # sort the pockemons base on their values
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ GUI
 
+    pokemon_list = sorted(pokemon_list, key=sorting_func, reverse=True)  # sort the pockemons base on their values
     # assign agent for each pokemon
     for pokemon in pokemon_list:
         agent_id: int = find_nearest_avaliable_agent(agents, pokemon, graph_copy)
         pokemon.agent_id = agent_id
 
-    busy_agents = []
-    for agent in agents:
-        if agent.path is not None:
-            busy_agents.append(agent)
     stop = False
-    threads = []
-    for agent in busy_agents:
-        thread = Thread(target=run_agent, args=(agent, graph_copy))
-        threads.append(thread)
-        thread.start()
+    if len(agents) > 1:
+        for agent in agents:
+            run_agent(agent, graph_copy)
+    else:
+        busy_agents = []
+        for agent in agents:
+            if len(agent.path) != 0:
+                busy_agents.append(agent)
 
-    i = 0
-    while threads[i % len(threads)].is_alive():
-        i += 1
+        threads = []
 
-    stop = True
-    client.move()
-    print("moved")
-    for thread in threads:
-        thread.join()
+        for agent in busy_agents:
+            thread = Thread(target=run_agent, args=(agent, graph_copy))
+            threads.append(thread)
+            thread.start()
+
+        i = 0
+        while threads[i % len(threads)].is_alive():
+            i += 1
+
+        stop = True
+        for thread in threads:
+            thread.join()
 
 # game over:
