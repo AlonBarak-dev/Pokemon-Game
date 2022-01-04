@@ -239,6 +239,8 @@ while client.is_running() == 'true':
     # graph_copy.plot_graph()
     # client.move()       # we want to do move() only when near pokemon!!!!!!!
     pokemon_list = sorted(pokemon_list, key=sorting_func, reverse=True)       # sort the pockemons base on their values
+
+
     # assign agent for each pokemon
     for pokemon in pokemon_list:
         agent_id: int = find_nearest_avaliable_agent(agents, pokemon, graph_copy)
