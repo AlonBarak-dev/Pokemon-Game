@@ -69,7 +69,7 @@ radius = 15
 
 game_info = Info.from_dict(json.loads(client.get_info()))
 for i in range(game_info.agents):
-    client.add_agent("{\"id\":2}")
+    client.add_agent("{\"id\":" + str(i) + "}")
 
 
 
@@ -84,14 +84,15 @@ The GUI and the "algo" are mixed - refactoring using MVC design pattern is requi
 
 def run_agent(agent: Agent, g_algo: GraphAlgo):
     while agent.path:
+        p = agent.path[0]
         if stop:
             break
         client.choose_next_edge(
             '{"agent_id":' + str(agent.id) + ', "next_node_id":' + str(agent.path[1 % len(agent.path)]) + '}')
         agent.pos = g_algo.get_graph().nodes[agent.path[1 % len(agent.path)]].pos
-        if isinstance(g_algo.get_graph().get_all_v()[agent.path[0]], Pokemon):
-            break
         agent.path.remove(agent.path[0])
+        if isinstance(g_algo.get_graph().get_all_v()[p], Pokemon):
+            break
 
 
 def sorting_func(pokemon):
@@ -103,6 +104,7 @@ def find_nearest_avaliable_agent(agent_list: list, curr_pokemon: Pokemon, graph:
     min_weight = mh.inf
     path = []
     agent_res = None
+    pokemon = curr_pokemon
     # find free agents
     for agent in agent_list:
         if len(agent.path) == 0:
@@ -110,9 +112,10 @@ def find_nearest_avaliable_agent(agent_list: list, curr_pokemon: Pokemon, graph:
 
     if len(free_agents) != 0:  # in case we found free agents
         for agent in free_agents:  # loop over the free agents
-            dist, sp_path = graph.shortest_path(agent.src, list(graph.get_graph().nodes.keys())[
-                list(graph.get_graph().nodes.values()).index(
-                    pokemon)])  # find the shortest path from agent src to pokemon
+            dist, sp_path = graph.shortest_path(agent.src, pokemon.edge.src)  # find the shortest path from agent src to pokemon
+            dist_1, sp_path_1 = graph.shortest_path(pokemon.edge.src, pokemon.edge.dest)
+            dist += dist_1
+            sp_path += sp_path_1
             # in case we found an agent with shorter path, switch
             if dist < min_weight:
                 min_weight = dist
@@ -120,25 +123,27 @@ def find_nearest_avaliable_agent(agent_list: list, curr_pokemon: Pokemon, graph:
                 agent_res = agent
 
         agent_res.path = path  # update the agent path
+        print(path)
         return agent_res.id  # return the agent id
 
     else:  # in case there are no free agents, loop over the agents
 
         for agent in agent_list:
             # in case one of the agents already going to the pokemon node, allocate the same agent
-            if pokemon.key in agent.path:
+            if pokemon.edge.src in agent.path and pokemon.edge.dest in agent.path:
                 return agent.id
-
             # find the shortest path from the agent last destination to the pokemon
-            dist, sp_path = graph.shortest_path(agent.path[-1], list(graph.get_graph().nodes.keys())[
-                list(graph.get_graph().nodes.values()).index(pokemon)])
+            dist, sp_path = graph.shortest_path(agent.path[-1], pokemon.edge.src)
+            dist_1, sp_path_1 = graph.shortest_path(pokemon.edge.src, pokemon.edge.dest)
+            dist += dist_1
+            sp_path += sp_path_1
             # in case we found an agent with shorter path, switch
             if dist < min_weight:
                 min_weight = dist
                 path = sp_path
                 agent_res = agent
 
-        agent_res.path.extand(path)  # update the agent path
+        agent_res.path += path  # update the agent path
         return agent_res.id
 
 
@@ -153,7 +158,8 @@ while client.is_running() == 'true':
     pokemons = pokemons.get("Pokemons")
 
     for pokemon in pokemons:
-        key = max(graph.get_graph().nodes.keys()) + 1
+        
+        key = max(graph_copy.get_graph().nodes.keys()) + 1
         poki = Pokemon.from_dict_pok(pokemon.get("Pokemon"), key)
         graph_copy.graph.add_pokemon(poki)
 
@@ -161,13 +167,15 @@ while client.is_running() == 'true':
         src = edge.src
         dest = edge.dest
         weight = edge.weight
-
+        poki.edge = edge
         graph_copy.graph.add_edge(src, poki.key, weight1)
         graph_copy.graph.add_edge(poki.key, dest, weight2)
         graph_copy.graph.remove_edge(edge.src, edge.dest)
 
         pokemon_list.append(poki)
+        print(poki.type)
 
+    print(graph_copy.graph)
     # creating agent object from the json file
     agent_json = json.loads(client.get_agents())
     agents = []

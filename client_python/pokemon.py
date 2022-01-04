@@ -9,6 +9,7 @@ class Pokemon(Node):
         self.value = value
         self.type = type
         self.agent_id = None
+        self.edge = None
 
     @classmethod
     def from_dict_pok(cls, data, key:int) -> 'Pokemon':
