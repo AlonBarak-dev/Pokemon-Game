@@ -22,5 +22,5 @@ The goal is to maximize the overall sum of points of the “grabbed” pokemons 
 ![ezgif-2-OOP_Ex4-gif](https://user-images.githubusercontent.com/80644255/148277077-0bf93916-3aa5-4139-8d9a-ed54db2ccda4.gif)
 <br>
 ---
-<br>
+
 ### In order to get more helpful information please visit our 
