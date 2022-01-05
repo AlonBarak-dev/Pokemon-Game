@@ -23,4 +23,4 @@ The goal is to maximize the overall sum of points of the “grabbed” pokemons 
 <br>
 ---
 
-### In order to get more helpful information please visit our 
+### In order to get more helpful information please visit our [ wiki ](https://github.com/AlonBarak-dev/Ex4_OOP/wiki)
