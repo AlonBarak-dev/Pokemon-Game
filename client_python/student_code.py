@@ -23,9 +23,6 @@ def run_agent(agent: Agent, g_algo: GraphAlgo):
             '{"agent_id":' + str(agent.id) + ', "next_node_id":' + str(agent.path[1 % len(agent.path)]) + '}')
         agent.pos = g_algo.get_graph().nodes[agent.path[1 % len(agent.path)]].pos
         agent.path.remove(agent.path[0])
-        if isinstance(g_algo.get_graph().get_all_v()[p], Pokemon):
-            client.move()
-            return
 
 
 def sorting_func(pokemon):
@@ -195,6 +192,8 @@ if __name__ == '__main__':
                 stop = True  # if the thread stopped
                 for thread in threads:
                     thread.join()
+
+            client.move()
 
     except ConnectionResetError as e:
         print("the server is down!", e)
