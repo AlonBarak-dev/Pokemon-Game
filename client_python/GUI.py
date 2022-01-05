@@ -38,6 +38,7 @@ class Gui:
         self.time_to_play = None
         self.overall_points = None
         self.moves_counter = None
+        self.game_level = None
 
     def run_gui(self, agents: list, pokemon_list: list, ttl: str, game_info: Info):
 
@@ -140,3 +141,6 @@ class Gui:
         self.screen.blit(self.overall_points, (250, 10))
         self.moves_counter = self.FONT.render(f"Moves: {str(game_info.moves)}", True, Color(255, 64, 64))
         self.screen.blit(self.moves_counter, (400, 10))
+        self.game_level = self.FONT.render(f"Game Level: {str(game_info.game_level)}", True, Color(255, 64, 64))
+        self.screen.blit(self.game_level, (550, 10))
+

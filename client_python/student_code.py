@@ -58,6 +58,7 @@ def find_nearest_avaliable_agent(agent_list: list, curr_pokemon: Pokemon, graph:
                 agent_res = agent
 
         agent_res.path = path  # update the agent path
+        print(path)
         return agent_res.id  # return the agent id
 
     else:  # in case there are no free agents, loop over the agents
@@ -78,6 +79,7 @@ def find_nearest_avaliable_agent(agent_list: list, curr_pokemon: Pokemon, graph:
                 agent_res = agent
 
         agent_res.path += path  # update the agent path
+        print(agent_res.path)
         return agent_res.id
 
 
@@ -143,7 +145,6 @@ if __name__ == '__main__':
                 graph_copy.graph.remove_edge(edge.src, edge.dest)
                 # add pokemon to pokemon list for more usages
                 pokemon_list.append(poki)
-                print(poki.type)
 
             # creating agent object from the json file
             agent_json = json.loads(client.get_agents())
