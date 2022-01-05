@@ -58,7 +58,6 @@ def find_nearest_avaliable_agent(agent_list: list, curr_pokemon: Pokemon, graph:
                 agent_res = agent
 
         agent_res.path = path  # update the agent path
-        print(path)
         return agent_res.id  # return the agent id
 
     else:  # in case there are no free agents, loop over the agents
@@ -79,7 +78,6 @@ def find_nearest_avaliable_agent(agent_list: list, curr_pokemon: Pokemon, graph:
                 agent_res = agent
 
         agent_res.path += path  # update the agent path
-        print(agent_res.path)
         return agent_res.id
 
 
@@ -165,8 +163,7 @@ if __name__ == '__main__':
             Algorithm part -> when there is only one agent use thread
             else, use for loop.
             """
-            pokemon_list = sorted(pokemon_list, key=sorting_func,
-                                  reverse=True)  # sort the pokemons base on their values
+            pokemon_list = sorted(pokemon_list, key=sorting_func,reverse=True)  # sort the pokemons base on their values
             # assign agent for each pokemon
             for pokemon in pokemon_list:
                 # finds an agent for the pokemon
