@@ -128,7 +128,10 @@ class Gui:
         for p in self.pokemon_list:
             x = self.my_scale(float(p.pos.x), x=True)
             y = self.my_scale(float(p.pos.y), y=True)
-            pygame.draw.circle(self.screen, Color(255, 128, 0), (x, y), 10)
+            if p.type == -1:
+                pygame.draw.circle(self.screen, Color(255, 128, 0), (x, y), 10)     # orange pokemons go down
+            else:
+                pygame.draw.circle(self.screen, Color(3, 18, 50), (x, y), 10)       # blue pokemons go up
 
     def create_buttons(self, ttl: str, game_info: Info):
         # draw stop button and more attributes for the user comfort
