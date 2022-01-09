@@ -1,7 +1,7 @@
 import math as mh
 import sys
 from threading import Thread
-from client import Client
+from client_python.client import Client
 import json
 from pygame import gfxdraw
 import pygame
@@ -11,7 +11,7 @@ from client_python.GUI import Gui
 from client_python.Info import Info
 from client_python.pokemon import Pokemon
 from graph.GraphAlgo import GraphAlgo
-from Button import Button
+from client_python.Button import Button
 
 
 def run_agent(agent: Agent, g_algo: GraphAlgo):

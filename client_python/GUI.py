@@ -6,7 +6,7 @@ from client_python.Agent import Agent
 from client_python.Info import Info
 from client_python.pokemon import Pokemon
 from graph.GraphAlgo import GraphAlgo
-from Button import Button
+from client_python.Button import Button
 
 
 class Gui:
