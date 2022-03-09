@@ -1,4 +1,4 @@
-# Ex4_OOP
+# Pokemon Game!
 
 ### Prof. Boaz Ben-Moshe <br>
 ### Submitted by:
