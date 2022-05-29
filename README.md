@@ -2,8 +2,8 @@
 
 ### Prof. Boaz Ben-Moshe <br>
 ### Submitted by:
-#### Omer Adar - 325022952
-#### Alon Barak - 213487598
+#### Omer Adar 
+#### Alon Barak 
 ---
 ### This repo contains an implementation of Pokemon game!!
 ### The game is being played on a directed weighted graph in Python!
